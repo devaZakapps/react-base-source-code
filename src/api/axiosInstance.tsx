@@ -19,10 +19,48 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Retrieve and add `ui-user-id` header
+    const uiUserId = getUiUserId();
+    if (uiUserId) {
+      config.headers['ui-user-id'] = uiUserId;
+    }
+
+
     return config;
   },
   (error) => Promise.reject(error)
 );
+
+
+export const getUiUserId = (): string | undefined => {
+  const userDetails = localStorage.getItem('user_details');
+  if (userDetails) {
+    try {
+      const parsedData = JSON.parse(userDetails);
+      const userId = parsedData?.userData?.[0]?.userId; // Navigate to userId
+      return userId ? String(userId) : undefined; // Ensure it's a string
+    } catch (error) {
+      console.error('Error parsing user_details from localStorage:', error);
+    }
+  }
+  return undefined;
+};
+
+export const getUserEmail = (): string | undefined => {
+  const userDetails = localStorage.getItem('user_details');
+  if (userDetails) {
+    try {
+      const parsedData = JSON.parse(userDetails);
+      const userId = parsedData?.userData?.[0]?.email; // Navigate to userId
+      return userId ? String(userId) : undefined; // Ensure it's a string
+    } catch (error) {
+      console.error('Error parsing user_details from localStorage:', error);
+    }
+  }
+  return undefined;
+};
+
 
 // Response interceptor to handle responses globally
 axiosInstance.interceptors.response.use(

@@ -1,8 +1,6 @@
 import axiosInstance from './axiosInstance';
 import { ApiResponse } from '../type/common';
 import { userLoginRequest, UserProfileResponse } from '../type/data/user';
-import { redirectToPage } from '../utils/utils';
-
 
 export const userLogin = async (payload: userLoginRequest) => {
   try {
@@ -30,4 +28,6 @@ export const getUserProfile = async (email: string) => {
     throw error;
   }
 };
+
+
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/button';
-import { userLogin } from '../api/userModal';
+import { getUserProfile, userLogin } from '../api/userModal';
 import { UserRequest } from '../type/data/user';
 import { redirectToPage } from '../utils/utils';
 import axios from 'axios';
@@ -28,6 +28,30 @@ function Login() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+
+  const getUserDetails = async () => {
+    const email = localStorage.getItem("user_email")
+    console.log("email in localstorage: ", email)
+    if (!email) {
+      redirectToPage('/login', false);
+    } else {
+      // getProjectsByUser()
+
+      const localstorage_userDetails = localStorage.getItem("user_details")
+      console.log("localstorage_userDetails :", localstorage_userDetails)
+
+      if (!localstorage_userDetails) {
+        const userDetails = await getUserProfile(email)
+        console.log("insdie getUserDetails :", userDetails)
+        if (userDetails) {
+          localStorage.setItem("user_details", JSON.stringify(userDetails))
+        } else {
+          redirectToPage('/login', false);
+        }
+      }
+    }
+  }
 
   const handleLoginClick = async (event: any) => {
     event.preventDefault();
@@ -64,6 +88,8 @@ function Login() {
           localStorage.setItem('session_id', response.headers['access_token']);
           localStorage.setItem('user_email', response.data.email);
           console.log("response user_email: ", response.data.email)
+          getUserDetails()
+
           redirectToPage('/dashboard');
         }
       } else {
@@ -92,7 +118,7 @@ function Login() {
             <label className="text-white font-roboto text-lg font-semibold leading-normal self-stretch">
               UI - LIBRARY
             </label>            {/* <img className="shrink-0" src="src/assets/Group 524.svg" />
-            <img src="/src/assets/factboard.svg" /> */}
+            <img src="/src/assets/ui-library.svg" /> */}
           </div>
         </div>
         <div className="flex flex-col gap-[30px]">
@@ -134,13 +160,14 @@ function Login() {
           </div>
           <div className="flex justify-center">
             <Button
-              asChild
+              // asChild
               variant={'secondary'}
               size={'md'}
               onClick={handleLoginClick}
               className="bg-primary-black text-white"
             >
-              <Link to="/dashboard">Login</Link>
+              Login
+
             </Button>
           </div>
           <div className="flex justify-center">

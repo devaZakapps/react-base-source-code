@@ -200,12 +200,11 @@ const TanStackTable = <TData extends Record<string, unknown>>({
           scrollBehavior: 'smooth',
         }}
       >
-
         <Table
           className={`min-w-full border-collapse rounded-[4px]`}
           tableHeight={`${tableConfigData.heightValue ? `${tableConfigData.heightValue}` : '500'}`}
         >
-          <TableHeader className="bg-gray-50 sticky top-0 z-10">
+          <TableHeader className="bg-[#2878e8] text-white sticky top-0 z-10">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
@@ -311,7 +310,6 @@ const TanStackTable = <TData extends Record<string, unknown>>({
             })}
           </TableBody>
         </Table>
-
       </div>
       {/* Pagination functionality */}
       {tableConfigData.paginationData?.enablePagination ? (

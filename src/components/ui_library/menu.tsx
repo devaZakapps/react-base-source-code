@@ -41,7 +41,7 @@ const Sidebar = () => {
       >
         <nav className="h-full bg-[#2165F5] pt-6 px-4 pb-1.5">
           <img
-            src={`${isSideBar ? 'src/assets/logo.svg' : '/src/assets/logo-factboard.svg'}`}
+            src={`${isSideBar ? 'src/assets/logo.svg' : '/src/assets/logo-ui-library.svg'}`}
           />
           <hr className="mt-2.5 " />
           <hr className="" />

@@ -16,8 +16,14 @@ import {
 import { PreviewComponent } from "./PreviewVariant"
 
 
-export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
+export const AddVariants = ({
+    handleAddVariantSave,
+    dependentComponentsArray,
+    componentsSelectedArray,
+    selectedComponentModel }:
     {
+        dependentComponentsArray: string[],
+        componentsSelectedArray: string[],
         handleAddVariantSave: any,
         selectedComponentModel: ComponentModel[]
     }) => {
@@ -27,11 +33,10 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
     const [currentComponentModel, setCurrentComponentModel] = useState<ComponentModel>()
 
 
-    console.log("currentComponentModel: ", currentComponentModel)
-    console.log("selectedComponentModelData: ", selectedComponentModelData)
     useEffect(() => {
-        console.log("inside Add Variants usseefect", selectedComponentModel)
-
+        console.log("inside addVariants selectedComponentModel: ", selectedComponentModel)
+        console.log("inside addVariants dependentComponentsArray: ", dependentComponentsArray)
+        console.log("inside addVariants componentsSelectedArray: ", componentsSelectedArray)
         filterComponentsByVariantsData(selectedComponentModel)
     }, [selectedComponentModel])
 
@@ -40,29 +45,20 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
     const filterComponentsByVariantsData = (selectedComponentModel: ComponentModel[]) => {
 
         const variantComponents = selectedComponentModel.filter((item) => item.isVariant)
-        console.log('inside filterComponentsByVariantsData variantComponents: ', variantComponents)
-
         setSelectedComponentModel(variantComponents)
         setCurrentComponentModel(variantComponents[0])
 
     }
 
     const handleComponentSelection = (item: string) => {
-        console.log("inside handleComponentSelection item:", item)
-        console.log("inside handleComponentSelection item:", item)
         const filteredComponents = selectedComponentModelData.filter((component: ComponentModel) =>
             component.value == item
         );
-        console.log("filteredComponents: ", filteredComponents)
         setCurrentComponentModel(filteredComponents[0])
     }
 
 
     const handleVariantKeyChange = (variantIndex: number, newName: string) => {
-
-        console.log("inside handleVariantKeyChange: ", newName)
-        console.log("inside handleVariantKeyChange variantIndex: ", variantIndex)
-        console.log("inside handleVariantKeyChange currentComponentModel: ", currentComponentModel)
 
         const updatedVariants = currentComponentModel?.variants?.map((variant, i) =>
             i === variantIndex ? { ...variant, name: newName } : variant
@@ -77,8 +73,6 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
 
 
     const handleAddVariantProp = () => {
-        console.log("inside handleAddVariantProp: ")
-        console.log("inside handleAddVariantProp currentComponentModel: ", currentComponentModel)
         const tempObject = { ...currentComponentModel } as ComponentModel;; // Clone the current component model to avoid direct mutation
         const tempVariant = {
             name: `variant_` + (tempObject?.variants?.length ?? 0 + 1),
@@ -89,17 +83,12 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
         };
 
         tempObject.variants = [...(tempObject.variants || []), tempVariant]; // Ensure variants is initialized as an array
-        console.log("inside handleAddVariantProp tempObject: ", tempObject);
 
         setCurrentComponentModel(tempObject); // Set the updated object as the new state
     }
 
 
     const handleVariantValueKeyChange = (variantIndex: number, valueIndex: number, newKey: string) => {
-        console.log("inside handleVariantValueKeyChange");
-        console.log("inside handleVariantValueKeyChange variantIndex: ", variantIndex);
-        console.log("inside handleVariantValueKeyChange valueIndex: ", valueIndex);
-        console.log("inside handleVariantValueKeyChange newKey: ", newKey);
 
         // Make a shallow copy of the variants array to avoid direct mutation of state
         const updatedVariants = [...currentComponentModel?.variants];
@@ -253,8 +242,6 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
     };
 
     const handleEditClick = (variantIndex: number) => {
-        console.log("inside handleEditClick");
-        console.log("Editing variant at index: ", variantIndex);
 
         // Create a shallow copy of the variants array to avoid direct mutation of state
         const updatedVariants = [...currentComponentModel?.variants];
@@ -273,8 +260,6 @@ export const AddVariants = ({ handleAddVariantSave, selectedComponentModel }:
     };
 
     const handleSaveClick = (variantIndex: number) => {
-        console.log("inside handleSaveClick");
-        console.log("Saving variant at index: ", variantIndex);
 
         // Create a shallow copy of the variants array to avoid direct mutation of state
         const updatedVariants = [...currentComponentModel?.variants];

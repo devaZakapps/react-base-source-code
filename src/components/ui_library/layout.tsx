@@ -46,9 +46,7 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     const storedMenu = getNameByPath(pathname);
-    console.log('menu', storedMenu);
     updateHeaderText(storedMenu);
-    console.log('selected value', pathname); // Call updateHeaderText with stored value
   }, [pathname]);
 
   return (

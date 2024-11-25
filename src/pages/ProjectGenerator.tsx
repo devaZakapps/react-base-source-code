@@ -9,11 +9,10 @@ import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../@/components/ui/tabs';
 import { Dependencies } from '../components/ui_library/ProjectGenerator/ComponentDependencies';
 import { AddVariants } from '../components/ui_library/ProjectGenerator/AddVariants';
-import { getProjectDetailsApi } from '../api/generateProjectModal';
-import { GetProjectDetailsRes } from '../type/data/generateProject';
-import { Input } from '../components/ui/input';
-
-
+import { generateProjectApi, getProjectDetailsApi } from '../api/generateProjectModal';
+import { GenerateProjectReq, GetProjectDetailsRes } from '../type/data/generateProject';
+import { useParams } from 'react-router-dom';
+import { ProjectDetails } from '../components/ui_library/ProjectGenerator/ProjectDetails';
 
 export interface ComponentModel {
   name: string
@@ -30,7 +29,6 @@ export interface Variant {
   name: string;
   value: Record<string, string>;
   isSaved: boolean
-
 }
 
 export interface Dependencies {
@@ -45,116 +43,6 @@ export interface ConfigFile {
 }
 
 export const SampleComponentModelData: ComponentModel[] = [
-  {
-    name: "Sidebar",
-    value: "sidebar",
-    installCmd: "npx shadcn@latest add sidebar",
-    component: "sidebar",
-    dependencies: {
-      components: [
-        "button",
-        "separator",
-        "sheet",
-        "tooltip",
-        "input",
-        "skeleton",
-      ],
-      hooks: [
-        "use-mobile"
-      ],
-      external: [
-        "@radix-ui/react-dialog",
-        "@radix-ui/react-separator",
-        "@radix-ui/react-slot",
-        "@radix-ui/react-tooltip"
-      ]
-    },
-    configFiles: [
-      {
-        fileName: "index.css",  // Path to the CSS file to modify
-        changes: `
-          :root
-            --sidebar-background: 0 0% 98%;
-              --sidebar-foreground: 240 5.3% 26.1%;
-              --sidebar-primary: 240 5.9% 10%;
-              --sidebar-primary-foreground: 0 0% 98%;
-              --sidebar-accent: 240 4.8% 95.9%;
-              --sidebar-accent-foreground: 240 5.9% 10%;
-              --sidebar-border: 220 13% 91%;
-              --sidebar-ring: 217.2 91.2% 59.8%;
-
-          .dark
-              --sidebar-background: 240 5.9% 10%;
-              --sidebar-foreground: 240 4.8% 95.9%;
-              --sidebar-primary: 224.3 76.3% 48%;
-              --sidebar-primary-foreground: 0 0% 100%;
-              --sidebar-accent: 240 3.7% 15.9%;
-              --sidebar-accent-foreground: 240 4.8% 95.9%;
-              --sidebar-border: 240 3.7% 15.9%;
-              --sidebar-ring: 217.2 91.2% 59.8%;
-        `
-      },
-      {
-        fileName: "tailwind.config.js",  // Path to the Tailwind config file
-        changes: `
-        sidebar: {
-  				DEFAULT: 'hsl(var(--sidebar-background))',
-  				foreground: 'hsl(var(--sidebar-foreground))',
-  				primary: 'hsl(var(--sidebar-primary))',
-  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-  				accent: 'hsl(var(--sidebar-accent))',
-  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-  				border: 'hsl(var(--sidebar-border))',
-  				ring: 'hsl(var(--sidebar-ring))'
-  			}
-        `
-      }
-    ],
-    isVariant: false,
-    variants: [],
-  },
-  {
-    name: "Button",
-    value: "button",
-    installCmd: "npx shadcn@latest add button",
-    component: "button",
-    dependencies: {
-      components: [],
-      hooks: [],
-      external: [
-        "@radix-ui/react-slot"
-      ]
-    },
-    configFiles: [],
-    isVariant: true,
-    variants: [
-      {
-        name: "variant",
-        value: {
-          default:
-            'font-bold bg-[#092C4C] text-white hover:bg-[#061F35]  active:bg-[#092C4C]/60 disabled:bg-[#E0E0E0]',
-          // outline:
-          //   'font-bold text-black border-2 border-[#092C4C] hover:bg-[#092C4C]/20 active:bg-[#092C4C]/60 active:border-[#092C4C]/30 disabled:border-[#BDBDBD] disabled:border-1 disabled:text-[#E0E0E0]',
-          // iconText:
-          //   'font-bold text-white bg-[#092C4C] hover:bg-[#061F35] active:bg-[#092C4C]/70 disabled:bg-[#E0E0E0] disabled:text-white',
-          // icon: 'text-white font-bold bg-[#092C4C] hover:bg-[#061F35] active:bg-[#092C4C]/60 disabled:bg-[#E0E0E0] disabled:text-white',
-        },
-        isSaved: true
-      },
-      {
-        name: "size",
-        value: {
-          default: 'w-[241px] h-12 rounded-lg px-4 py-2',
-          // sm: 'w-[275px] h-[55px] rounded-lg px-3',
-          // md: 'w-[310px] h-[62px] rounded-lg',
-          // lg: 'w-[344px] h-[68px] rounded-lg px-8',
-          // iconText: 'w-[283px] h-[55px] rounded-lg',
-          // icon: 'h-14 w-14 rounded-full',
-        },
-        isSaved: true
-      },
-    ],
-  },
   {
     name: 'Accordion',
     value: 'accordion',
@@ -201,15 +89,25 @@ export const SampleComponentModelData: ComponentModel[] = [
     name: 'Alert',
     value: 'alert',
     installCmd: '',
-    component: 'alert.tsx',
+    component: 'alert',
     dependencies: {
       components: [],
       hooks: [],
       external: []
     },
     configFiles: [],
-    isVariant: false,
-    variants: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "variant",
+        value: {
+          default: "bg-background text-foreground",
+          destructive:
+            "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        },
+        isSaved: true
+      }
+    ],
   },
   {
     name: 'AlertDialog',
@@ -269,8 +167,22 @@ export const SampleComponentModelData: ComponentModel[] = [
       external: []
     },
     configFiles: [],
-    isVariant: false,
-    variants: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "variant",
+        value: {
+          default:
+            "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+          secondary:
+            "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          destructive:
+            "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+          outline: "text-foreground",
+        },
+        isSaved: true
+      }
+    ],
   },
   {
     name: 'Breadcrumb',
@@ -285,6 +197,49 @@ export const SampleComponentModelData: ComponentModel[] = [
     configFiles: [],
     isVariant: false,
     variants: [],
+  },
+  {
+    name: "Button",
+    value: "button",
+    installCmd: "npx shadcn@latest add button",
+    component: "button",
+    dependencies: {
+      components: [],
+      hooks: [],
+      external: [
+        "@radix-ui/react-slot"
+      ]
+    },
+    configFiles: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "variant",
+        value: {
+          default:
+            "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          destructive:
+            "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          outline:
+            "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          secondary:
+            "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+          ghost: "hover:bg-accent hover:text-accent-foreground",
+          link: "text-primary underline-offset-4 hover:underline",
+        },
+        isSaved: true
+      },
+      {
+        name: "size",
+        value: {
+          default: "h-9 px-4 py-2",
+          sm: "h-8 rounded-md px-3 text-xs",
+          lg: "h-10 rounded-md px-8",
+          icon: "h-9 w-9",
+        },
+        isSaved: true
+      },
+    ],
   },
   {
     name: 'Calendar',
@@ -304,7 +259,47 @@ export const SampleComponentModelData: ComponentModel[] = [
     },
     configFiles: [],
     isVariant: true,
-    variants: [],
+    variants: [
+      {
+        name: "classNames",
+        value: {
+          months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+          month: "space-y-4",
+          caption: "flex justify-center pt-1 relative items-center",
+          caption_label: "text-sm font-medium",
+          nav: "space-x-1 flex items-center",
+          nav_button_previous: "absolute left-1",
+          nav_button_next: "absolute right-1",
+          table: "w-full border-collapse space-y-1",
+          head_row: "flex",
+          head_cell: "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+          row: "flex w-full mt-2",
+          day_range_start: "day-range-start",
+          day_range_end: "day-range-end",
+          day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+          day_today: "bg-accent text-accent-foreground",
+          day_outside: "day-outside text-muted-foreground opacity-50  aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
+          day_disabled: "text-muted-foreground opacity-50",
+          day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          day_hidden: "invisible",
+          day: `cn(
+            buttonVariants({ variant: "ghost" }),
+            "h-8 w-8 p-0 font-normal aria-selected:opacity-100"
+          )`,
+          cell: ` cn(
+            "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
+            props.mode === "range"
+              ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
+              : "[&:has([aria-selected])]:rounded-md"
+          )`,
+          nav_button: `cn(
+            buttonVariants({ variant: "outline" }),
+            "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          )`,
+        },
+        isSaved: true
+      }
+    ],
   },
   {
     name: 'Card',
@@ -385,20 +380,20 @@ export const SampleComponentModelData: ComponentModel[] = [
     isVariant: false,
     variants: [],
   },
-  {
-    name: 'Combobox',
-    value: 'combobox',
-    installCmd: '',
-    component: "",
-    dependencies: {
-      components: [],
-      hooks: [],
-      external: []
-    },
-    configFiles: [],
-    isVariant: false,
-    variants: [],
-  },
+  // {
+  //   name: 'Combobox',
+  //   value: 'combobox',
+  //   installCmd: '',
+  //   component: "",
+  //   dependencies: {
+  //     components: [],
+  //     hooks: [],
+  //     external: []
+  //   },
+  //   configFiles: [],
+  //   isVariant: false,
+  //   variants: [],
+  // },
   {
     name: 'Command',
     value: 'command',
@@ -432,34 +427,34 @@ export const SampleComponentModelData: ComponentModel[] = [
     isVariant: false,
     variants: [],
   },
-  {
-    name: 'DataTable',
-    value: 'datatable',
-    installCmd: '',
-    component: "",
-    dependencies: {
-      components: [],
-      hooks: [],
-      external: []
-    },
-    configFiles: [],
-    isVariant: false,
-    variants: [],
-  },
-  {
-    name: 'DatePicker',
-    value: 'datepicker',
-    installCmd: '',
-    component: "",
-    dependencies: {
-      components: [],
-      hooks: [],
-      external: []
-    },
-    configFiles: [],
-    isVariant: false,
-    variants: [],
-  },
+  // {
+  //   name: 'DataTable',
+  //   value: 'datatable',
+  //   installCmd: '',
+  //   component: "",
+  //   dependencies: {
+  //     components: [],
+  //     hooks: [],
+  //     external: []
+  //   },
+  //   configFiles: [],
+  //   isVariant: false,
+  //   variants: [],
+  // },
+  // {
+  //   name: 'DatePicker',
+  //   value: 'datepicker',
+  //   installCmd: '',
+  //   component: "",
+  //   dependencies: {
+  //     components: [],
+  //     hooks: [],
+  //     external: []
+  //   },
+  //   configFiles: [],
+  //   isVariant: false,
+  //   variants: [],
+  // },
   {
     name: 'Dialog',
     value: 'dialog',
@@ -503,20 +498,20 @@ export const SampleComponentModelData: ComponentModel[] = [
     isVariant: false,
     variants: [],
   },
-  {
-    name: 'Form',
-    value: 'form',
-    installCmd: '',
-    component: "",
-    dependencies: {
-      components: [],
-      hooks: [],
-      external: []
-    },
-    configFiles: [],
-    isVariant: false,
-    variants: [],
-  },
+  // {
+  //   name: 'Form',
+  //   value: 'form',
+  //   installCmd: '',
+  //   component: "",
+  //   dependencies: {
+  //     components: [],
+  //     hooks: [],
+  //     external: []
+  //   },
+  //   configFiles: [],
+  //   isVariant: false,
+  //   variants: [],
+  // },
   {
     name: 'HoverCard',
     value: 'hovercard',
@@ -754,6 +749,87 @@ export const SampleComponentModelData: ComponentModel[] = [
       ]
     },
     configFiles: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "side",
+        value: {
+          top: "inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+          bottom:
+            "inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+          left: "inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+          right:
+            "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+        },
+        isSaved: true,
+      }
+    ],
+  },
+  {
+    name: "Sidebar",
+    value: "sidebar",
+    installCmd: "npx shadcn@latest add sidebar",
+    component: "sidebar",
+    dependencies: {
+      components: [
+        "button",
+        "separator",
+        "sheet",
+        "tooltip",
+        "input",
+        "skeleton",
+      ],
+      hooks: [
+        "use-mobile"
+      ],
+      external: [
+        "@radix-ui/react-dialog",
+        "@radix-ui/react-separator",
+        "@radix-ui/react-slot",
+        "@radix-ui/react-tooltip"
+      ]
+    },
+    configFiles: [
+      {
+        fileName: "index.css",  // Path to the CSS file to modify
+        changes: `
+          :root
+            --sidebar-background: 0 0% 98%;
+              --sidebar-foreground: 240 5.3% 26.1%;
+              --sidebar-primary: 240 5.9% 10%;
+              --sidebar-primary-foreground: 0 0% 98%;
+              --sidebar-accent: 240 4.8% 95.9%;
+              --sidebar-accent-foreground: 240 5.9% 10%;
+              --sidebar-border: 220 13% 91%;
+              --sidebar-ring: 217.2 91.2% 59.8%;
+
+          .dark
+              --sidebar-background: 240 5.9% 10%;
+              --sidebar-foreground: 240 4.8% 95.9%;
+              --sidebar-primary: 224.3 76.3% 48%;
+              --sidebar-primary-foreground: 0 0% 100%;
+              --sidebar-accent: 240 3.7% 15.9%;
+              --sidebar-accent-foreground: 240 4.8% 95.9%;
+              --sidebar-border: 240 3.7% 15.9%;
+              --sidebar-ring: 217.2 91.2% 59.8%;
+        `
+      },
+      {
+        fileName: "tailwind.config.js",  // Path to the Tailwind config file
+        changes: `
+        sidebar: {
+  				DEFAULT: 'hsl(var(--sidebar-background))',
+  				foreground: 'hsl(var(--sidebar-foreground))',
+  				primary: 'hsl(var(--sidebar-primary))',
+  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+  				accent: 'hsl(var(--sidebar-accent))',
+  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+  				border: 'hsl(var(--sidebar-border))',
+  				ring: 'hsl(var(--sidebar-ring))'
+  			}
+        `
+      }
+    ],
     isVariant: false,
     variants: [],
   },
@@ -881,8 +957,17 @@ export const SampleComponentModelData: ComponentModel[] = [
       ]
     },
     configFiles: [],
-    isVariant: false,
-    variants: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "variant",
+        value: {
+          default: "border bg-background text-foreground",
+          destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        },
+        isSaved: true
+      }
+    ],
   },
   {
     name: 'Toggle',
@@ -897,8 +982,25 @@ export const SampleComponentModelData: ComponentModel[] = [
       ]
     },
     configFiles: [],
-    isVariant: false,
-    variants: [],
+    isVariant: true,
+    variants: [
+      {
+        name: "variant",
+        value: {
+          default: "bg-transparent",
+          outline: "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
+        },
+        isSaved: true
+      },
+      {
+        name: "size",
+        value: {
+          default: "bg-transparent",
+          outline: "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
+        },
+        isSaved: true
+      }
+    ],
   },
   {
     name: 'ToggleGroup',
@@ -937,6 +1039,8 @@ export const SampleComponentModelData: ComponentModel[] = [
   }
 ];
 
+
+
 export const SampleTabData = [
   {
     name: "Project Details",
@@ -965,15 +1069,23 @@ export interface TabData {
   value: string
 }
 
+export interface ProjectDetailsData {
+  projectName: string
+  projectDescription: string
+  prefix: string
+  suffix: string
+
+}
+
 
 // const ProjectGenerator: React.FC = (projectId: number | undefined) => {
 const ProjectGenerator: React.FC = () => {
+  const { projectId } = useParams();
 
   const [componentModel, setComponentModel] = useState<ComponentModel[]>([])
 
-  console.log("componentModel debug: ", componentModel)
-  const [selectedComponentModel, setSelectedComponentModel] = useState<ComponentModel[]>([])
 
+  const [selectedComponentModel, setSelectedComponentModel] = useState<ComponentModel[]>([])
   const [componentsSelected, setComponentsSelected] = useState<string[]>([])
   const [selectedDependentComponents, setSelectedDependentComponents] = useState<string[]>([])
 
@@ -984,69 +1096,53 @@ const ProjectGenerator: React.FC = () => {
   const [isPreviousEnable, setIsPreviousEnable] = useState<boolean>(false)
 
 
+  const [projectDetails, setProjectDetails] = useState<ProjectDetailsData>({
+    projectName: "",
+    projectDescription: "",
+    prefix: "",
+    suffix: ""
+  })
 
+  const [projectDetailError, setProjectDetailError] = useState<ProjectDetailsData>({
+    projectName: "",
+    projectDescription: "",
+    prefix: "",
+    suffix: ""
+  })
+
+
+  console.log("componentModel debug: ", componentModel)
   console.log("checkbbox component componentsSelected: ", componentsSelected)
   console.log("checkbbox component selectedDependentComponents: ", selectedDependentComponents)
   useEffect(() => {
-    getProjectDetails(15)
 
-  }, [])
+    setTabData(SampleTabData)
+    setCurrentTab(SampleTabData[0].value)
+    // Convert projectId to a number if it exists, otherwise keep it undefined
+    const parsedProjectId = projectId ? parseInt(projectId, 10) : undefined;
+    getProjectDetails(parsedProjectId)
+
+  }, [projectId])
 
 
   const getProjectDetails = async (projectId: number | undefined) => {
     if (projectId) {
-      console.log("inside getProjectDetails: ", projectId)
       const response = await getProjectDetailsApi(projectId)
       if (response.status == 200) {
         const responseData: GetProjectDetailsRes = response.data
-        console.log("response - getProjectDetailsApi: ", responseData.projectDetails)
-        console.log("response - getProjectDetailsApi: ", responseData.projectDetails[0].projectId)
-
         if (responseData.projectDetails[0].projectId == undefined) {
-          console.log("inside if")
-          console.log("inside if setComponentModel", SampleComponentModelData)
 
           setComponentModel(SampleComponentModelData)
-          setTabData(SampleTabData)
-          setCurrentTab(SampleTabData[0].value)
+          // setTabData(SampleTabData)
+          // setCurrentTab(SampleTabData[0].value)
 
           //Need to comment
           // setComponentsSelected(['accordion', 'alertdialog', 'card', 'calendar', 'breadcrumb', 'badge', 'button'])
           setComponentsSelected([])
         } else {
-          console.log("responseData: ", responseData.projectDetails[0].metaData)
-          console.log("inside else setComponentModel", responseData.projectDetails)
-          console.log("inside else setComponentModel", responseData.projectDetails[0].metaData)
 
-
-
-          // const initalData = SampleComponentModelData;
-
-          // const updatedData = responseData.projectDetails[0].metaData.map((backendItem) => {
-          //   // Find a matching object in the UI data by name
-          //   const uiItem = initalData.find((uiItem) => uiItem.name === backendItem.name);
-          //   console.log("updatedData - uiItem: ", uiItem)
-
-          //   // If a match is found, replace the backend object with the UI object
-          //   return uiItem ? { ...backendItem, ...uiItem } : backendItem;
-          // });
-
-          // console.log("updatedData: ", updatedData)
 
           const initialData = SampleComponentModelData;
-
-          // const updatedData = responseData.projectDetails[0].metaData.map((backendItem) => {
-          //   // Normalize names for comparison
-          //   const uiItem = initialData.find(
-          //     (uiItem) => uiItem.name.trim().toLowerCase() === backendItem.name.trim().toLowerCase()
-          //   );
-
-          //   console.log("Matching UI Item: ", uiItem);
-
-          //   // If a match is found, replace the backend object with the UI object
-          //   return uiItem ? { ...backendItem, ...uiItem } : backendItem;
-          // });
-
 
           const selectedData: string[] = []
           const dependentData: string[] = []
@@ -1057,31 +1153,33 @@ const ProjectGenerator: React.FC = () => {
               (backendItem) => backendItem.name.trim().toLowerCase() === uiItem.name.trim().toLowerCase()
             );
 
-            console.log("Matching backendItem: ", backendItem);
             if (backendItem) {
               selectedData.push(backendItem.value)
               if (backendItem?.dependencies?.components?.length > 0) {
                 backendItem?.dependencies?.components.forEach((item) => {
-                  console.log("depednednt component creation: ", item)
                   dependentData.push(item)
                 })
 
               }
             }
 
-
             return backendItem ? { ...uiItem, ...backendItem } : uiItem;
           });
 
-          console.log("Updated Data: ", updatedData);
+          // setCurrentTab(SampleTabData[0].value)
+          // setTabData(SampleTabData)
           setComponentModel(updatedData)
-          setCurrentTab(SampleTabData[0].value)
-          setTabData(SampleTabData)
-
-          //Need to comment
-          // setComponentsSelected(['accordion', 'alertdialog', 'card', 'calendar', 'breadcrumb', 'badge', 'button'])
           setComponentsSelected(selectedData)
           setSelectedDependentComponents(dependentData)
+          setSelectedComponentModel(responseData.projectDetails[0].metaData)
+
+          const tempProjectDetails: ProjectDetailsData = {
+            projectName: responseData.projectDetails[0].projectName,
+            projectDescription: responseData.projectDetails[0].description,
+            prefix: responseData.projectDetails[0].prefix,
+            suffix: responseData.projectDetails[0].suffix
+          }
+          setProjectDetails(tempProjectDetails)
 
         }
 
@@ -1091,20 +1189,54 @@ const ProjectGenerator: React.FC = () => {
 
     } else {
       setComponentModel(SampleComponentModelData)
-      setTabData(SampleTabData)
-      setCurrentTab(SampleTabData[0].value)
 
+      setSelectedDependentComponents([])
+      setSelectedComponentModel([])
       //Need to comment
       // setComponentsSelected(['accordion', 'alertdialog', 'card', 'calendar', 'breadcrumb', 'badge', 'button'])
       setComponentsSelected([])
     }
   }
 
-  // Handle checkbox change
-  const HandleCheckboxChange = (value: string) => {
-    console.log("HandleCheckboxChange: ", value);
+  // handle checkbox change
+  const handleCheckboxChange = (value: string) => {
 
     let selectedComponentOutputArray: string[] = [];
+
+    let tempDependentComponents: string[] = []
+    // let updatedDependentComponents = [...selectedDependentComponents]
+
+    setSelectedComponentModel((prevState) => {
+      const isComponentAvailable = prevState.some(
+        (component) => component.value === value
+      );
+
+      if (isComponentAvailable) {
+        // Remove the component if it already exists
+        const tempComponent = prevState.filter((component) => component.value !== value);
+
+        // tempComponent.forEach(
+        //   (component) => tempDependentComponents = [...tempDependentComponents, ...component.dependencies.components]
+        // )
+
+        return tempComponent
+      } else {
+        // Find the matching component in componentModel
+        const tempComponent = componentModel.find((component) => component.value === value);
+
+        if (tempComponent) {
+
+          // tempDependentComponents = [...tempDependentComponents, ...tempComponent.dependencies.components]
+
+
+          // Add the new component to the array
+          return [...prevState, tempComponent];
+        } else {
+          console.warn(`Component with value "${value}" not found in componentModel.`);
+          return prevState; // No change if not found
+        }
+      }
+    });
 
     if (componentsSelected.includes(value)) {
       selectedComponentOutputArray = componentsSelected.filter(item => item !== value);
@@ -1112,30 +1244,30 @@ const ProjectGenerator: React.FC = () => {
       selectedComponentOutputArray = [...componentsSelected, value];
     }
 
+    selectedComponentOutputArray.forEach((tempCurrentSelectedComponent) => {
+      const tempComponent = componentModel.find((component) => component.value === tempCurrentSelectedComponent);
+      if (tempComponent) {
+        tempDependentComponents = [...tempDependentComponents, ...tempComponent.dependencies.components]
+      }
+    })
+
+
+    console.log("inside handleCheckboxChange tempDependentComponents: ", tempDependentComponents)
+
+
 
     // Update the state with the new array
-
-    // console.log("inside HandleCheckboxChange selectedComponentOutputArray: ", selectedComponentOutputArray)
-    // console.log("inside HandleCheckboxChange selectedDependentComponentOutputArray: ", selectedDependentComponentOutputArray)
-
     setComponentsSelected(selectedComponentOutputArray);
-    // setSelectedDependentComponents(selectedDependentComponentOutputArray)
+    setSelectedDependentComponents(tempDependentComponents)
   };
 
-  console.log("inside HandleCheckboxChange selectedComponentOutputArray: ", componentsSelected)
-  console.log("inside HandleCheckboxChange selectedDependentComponentOutputArray: ", selectedDependentComponents)
 
 
-  const HandleNextClick = () => {
-    console.log("inside HandleNextClick", componentsSelected)
-    console.log("componentsSelected", componentsSelected)
-    console.log("currentTab", currentTab)
-    console.log("tabData", tabData)
+  const handleNextClick = () => {
+    console.log("inside handleNextClick ")
 
     const index = tabData?.findIndex(item => item.value === currentTab);
-    // if (index + 1> tabData?.length){
 
-    // }
     if (tabData.length > 0) {
       if (index + 2 == tabData.length) {
         setCurrentTab(tabData[index + 1].value)
@@ -1149,27 +1281,45 @@ const ProjectGenerator: React.FC = () => {
     }
 
 
-    if (index == 0) {
-      const filteredComponents = componentModel.filter((component: ComponentModel) =>
-        componentsSelected.includes(component.value)
+    if (index == 1) {
+
+      const requiredComponentsArray = Array.from(new Set([...componentsSelected, ...selectedDependentComponents]));
+      console.log("inside handleNextClick - requiredComponentsArray ", requiredComponentsArray)
+
+      const tempSelcetedComponentModal = selectedComponentModel.filter((component) =>
+        requiredComponentsArray.includes(component.value)
       );
 
-      setSelectedComponentModel(filteredComponents)
+      console.log("inside handleNextClick - tempSelcetedComponentModal ", tempSelcetedComponentModal)
+
+
+      // Create a new array to avoid mutating the existing state
+      const updatedSelectedComponentsModal = [...tempSelcetedComponentModal];
+
+
+      requiredComponentsArray.forEach((value) => {
+
+        const isComponentModalAlreadySelected = selectedComponentModel.some((selectedComponent) => selectedComponent.value == value)
+
+        if (!isComponentModalAlreadySelected) {
+          const componentModalToAdd = componentModel.find((newComponentModal) => newComponentModal.value == value)
+          if (componentModalToAdd) {
+            updatedSelectedComponentsModal.push(componentModalToAdd)
+          }
+        }
+        console.log("inside handleNextClick - updatedSelectedComponentsModal ", updatedSelectedComponentsModal)
+
+        setSelectedComponentModel(updatedSelectedComponentsModal);
+      })
+
     }
 
   }
 
-  console.log("previous enable: ", isPreviousEnable)
 
-  const HandlePreviousClick = () => {
-    console.log("inside HandlePreviousClick", componentsSelected)
-    console.log("inside HandlePreviousClick componentsSelected", componentsSelected)
-    console.log("inside HandlePreviousClick currentTab", currentTab)
-    console.log("inside HandlePreviousClick tabData", tabData)
+  const handlePreviousClick = () => {
 
     const index = tabData?.findIndex(item => item.value === currentTab);
-    // if (index + 1> tabData?.length){
-    console.log("inside HandlePreviousClick index", index)
 
     if (index == tabData.length - 1) {
       setIsSubmitEnable(false)
@@ -1181,58 +1331,94 @@ const ProjectGenerator: React.FC = () => {
       setCurrentTab(tabData[index - 1].value)
     }
 
+  }
 
-    // if (index != 0) {
+  const handleSaveAsDraftClick = async () => {
+    const payload: GenerateProjectReq = {
+      name: projectDetails.projectName,
+      description: projectDetails.projectDescription,
+      status: 1,
+      data: selectedComponentModel,
+      prefix: projectDetails.prefix,
+      suffix: projectDetails.suffix
+    }
 
-    //   // setIsSubmitEnable(true)
-    // }
+    const generateProjectApiRespose = await generateProjectApi(payload)
+    if (generateProjectApiRespose.status == 200) {
 
-    // }
-    // if (tabData.length > 0) {
-    //   if (index + 2 == tabData.length) {
-    //     setCurrentTab(tabData[index + 1].value)
-    //     setIsSubmitEnable(true)
-    //   } else {
-    //     setCurrentTab(tabData[index + 1].value)
+      // Check the Content-Type to differentiate between binary data and JSON
+      const contentType = generateProjectApiRespose.headers['content-type'];
 
-    //   }
-    // }
+      if (contentType.includes('application/zip')) {
+        // Handle the zip file response
+        const blob = new Blob([generateProjectApiRespose.data], { type: 'application/zip' });
 
+        // Create a downloadable link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${payload.name}.zip`; // File name for download
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        console.log('Zip file downloaded successfully');
+      } else if (contentType.includes('application/json')) {
+        // Handle the JSON response
+        const jsonResponse = JSON.parse(new TextDecoder().decode(generateProjectApiRespose.data));
+        console.log('JSON response:', jsonResponse);
+      } else {
+        throw new Error('Unexpected content type received');
+      }
+    }
 
   }
 
-  const HandleSaveAsDraftClick = () => {
-    console.log("inside HandleSaveAsDraftClick", componentsSelected)
+  const handleSubmitClick = async () => {
+    const payload: GenerateProjectReq = {
+      name: projectDetails.projectName,
+      description: projectDetails.projectDescription,
+      status: 2,
+      data: selectedComponentModel,
+      prefix: projectDetails.prefix,
+      suffix: projectDetails.suffix
+    }
+
+    const generateProjectApiRespose = await generateProjectApi(payload)
+    if (generateProjectApiRespose.status == 200) {
+      console.log("generateProjectApiRespose", generateProjectApiRespose.data)
+
+      // Check the Content-Type to differentiate between binary data and JSON
+      const contentType = generateProjectApiRespose.headers['content-type'];
+
+      if (contentType.includes('application/zip')) {
+        // Handle the zip file response
+        const blob = new Blob([generateProjectApiRespose.data], { type: 'application/zip' });
+
+        // Create a downloadable link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${payload.name}.zip`; // File name for download
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+
+        console.log('Zip file downloaded successfully');
+      } else if (contentType.includes('application/json')) {
+        // Handle the JSON response
+        const jsonResponse = JSON.parse(new TextDecoder().decode(generateProjectApiRespose.data));
+        console.log('JSON response:', jsonResponse);
+      } else {
+        throw new Error('Unexpected content type received');
+      }
+    }
+
   }
-
-
-  const HandleSubmitClick = () => {
-    console.log("inside HandleSubmitClick", componentsSelected)
-    console.log("inside HandleSubmitClick selectedComponentModel", selectedComponentModel)
-    console.log("inside HandleSubmitClick selectedComponentModel", selectedComponentModel[1].variants)
-  }
-
-
-  // const handleTabChange = () => {
-  //   // console.log("Tab clicked:", value);
-  //   // const filteredComponents = componentModel.filter((component: ComponentModel) =>
-  //   //   componentsSelected.includes(component.value)
-  //   // );
-
-  //   // setSelectedComponentModel(filteredComponents)
-  //   // setCurrentTab(value)
-  //   return 0
-
-  // }
-
-  console.log("inside projectGenerator  SelectedComponentModel: ", selectedComponentModel)
-
 
   const handleAddVariantSave = (componentName: string, newVariant: any) => {
-    console.log("inside handleAddVariantSave componentName : ", componentName)
-    console.log("inside handleAddVariantSave  newVariant: ", newVariant)
-    console.log("inside handleAddVariantSave  SelectedComponentModel: ", selectedComponentModel)
-
     // Create a new state variable to store the updated data
     const updatedComponentModels = selectedComponentModel.map(component => {
       if (component.name === componentName) {
@@ -1242,143 +1428,236 @@ const ProjectGenerator: React.FC = () => {
       // Return unchanged component
       return component;
     });
-    console.log("updatedComponentModels: ", updatedComponentModels)
     // Update state
     setSelectedComponentModel(updatedComponentModels);
 
   }
 
+  const enableNext = () => {
+    let flag: boolean = true
+
+
+    console.log("inside enableNext")
+    console.log("inside enableNext :componentModel", selectedComponentModel)
+
+    if (currentTab == "projectDetails") {
+      // Check if there are any errors in the error object
+      const hasErrors =
+        Object.values(projectDetailError).some((error) => error !== "") || projectDetails.projectName.trim() === "" ||
+        projectDetails.projectDescription.trim() === "";
+      // const hasErrors = Object.values(projectDetailError).some((error) => error !== "");
+
+
+
+      flag = !hasErrors
+    } else if (currentTab == "componentSelection") {
+      flag = selectedComponentModel.length > 0
+    }
+    return flag
+  }
+
+  const handleProjectDetailsInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    //  Validate the input
+    const error = validateField(name, value);
+
+    // Update the errors and the state
+    setProjectDetailError((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }));
+
+    // Dynamically update the state
+    setProjectDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+  };
+
+  // // Validation function
+  // const validateField = (name: string, value: string): string => {
+  //   if (name === "projectName") {
+  //     // Allow alphanumeric and dashes for zip file compatibility
+  //     const isValid = /^[a-zA-Z0-9_-]+$/.test(value);
+  //     return isValid ? "" : "Invalid project name. Use only letters, numbers, dashes, or underscores.";
+  //   }
+
+  //   if (name === "prefix" || name === "suffix") {
+  //     // Allow valid JSX element names (alphanumeric, underscores)
+  //     const isValid = /^[a-zA-Z0-9_]+$/.test(value);
+  //     return isValid ? "" : "Invalid name. Use only letters, numbers, or underscores.";
+  //   }
+
+  //   if (name === "projectDescription") {
+  //     // Ensure no special characters
+  //     const isValid = /^[a-zA-Z0-9\s]+$/.test(value);
+  //     return isValid ? "" : "Description must not contain special characters.";
+  //   }
+
+  //   return ""; // No error by default
+  // };
+
+
+  const validateField = (name: string, value: string): string => {
+    if (name === "projectName") {
+      if (value.trim() === "") {
+        return "Project name is required.";
+      }
+      // Allow alphanumeric and dashes for zip file compatibility
+      const isValid = /^[a-zA-Z0-9_-]+$/.test(value);
+      return isValid ? "" : "Invalid project name. Use only letters, numbers, dashes, or underscores.";
+    }
+
+    if (name === "prefix" || name === "suffix") {
+      // Allow valid JSX element names (alphanumeric, underscores); can be empty
+      if (value.trim() === "") {
+        return ""; // Empty prefix or suffix is allowed
+      }
+      const isValid = /^[a-zA-Z0-9_]+$/.test(value);
+      return isValid ? "" : "Invalid name. Use only letters, numbers, or underscores.";
+    }
+
+    if (name === "projectDescription") {
+      if (value.trim() === "") {
+        return "Project description is required.";
+      }
+      // Ensure no special characters
+      const isValid = /^[a-zA-Z0-9\s]+$/.test(value);
+      return isValid ? "" : "Description must not contain special characters.";
+    }
+
+    return ""; // No error by default
+  };
 
 
   return (
-    <Card >
-      <CardContent>
-        <Tabs value={currentTab} className="w-full">
-          <TabsList >
-            {
-              tabData?.map((item, index) => {
-                return (
-                  <TabsTrigger key={index} value={item.value}
-                    onClick={() => 0}
-
-                  >{item.name}</TabsTrigger>
-
-                )
-              })
-            }
-            {/* <TabsTrigger value="password">Password</TabsTrigger> */}
-          </TabsList>
-          <TabsContent value='projectDetails'>
-            <div>
-              <div>
-                Project Name: <Input>
-                </Input>
-                Project Description: <Input>
-                </Input>
-                Prefix: <Input>
-                </Input>
-                SuffixL<Input></Input>
-              </div>
-            </div>
-
-          </TabsContent>
-          <TabsContent value="componentSelection">
-            <div className='grid gap-1.5 grid-cols-6 p-2.5'>
+    <div className='p-2'>
+      <Card className='' >
+        <CardContent className='p-2'>
+          <Tabs value={currentTab} className="w-full">
+            <TabsList >
               {
-                componentModel.length > 0
-                  ?
-                  componentModel.map((item, index) => {
-                    return (
-                      <div key={index} className="flex items-center space-x-2 p-3">
-                        <Checkbox
-                          name={item.name}
-                          id={`${item.name}-${index}`}
-                          value={item.value}
-                          onCheckedChange={() => HandleCheckboxChange(item.value)}
-                          checked={componentsSelected.includes(item.value) || selectedDependentComponents.includes(item.value)}
-                        />
-                        <label
-                          htmlFor={`${item.name}-${index}`}
-                          className={`text-sm 
+                tabData?.map((item, index) => {
+                  return (
+                    <TabsTrigger key={index} value={item.value}
+                      onClick={() => 0}
+
+                    >{item.name}</TabsTrigger>
+
+                  )
+                })
+              }
+              {/* <TabsTrigger value="password">Password</TabsTrigger> */}
+            </TabsList>
+            <TabsContent value='projectDetails'>
+              <ProjectDetails
+                projectDetailError={projectDetailError}
+                projectDetailData={projectDetails}
+                handleProjectDetailsInputChange={handleProjectDetailsInputChange}
+              />
+            </TabsContent>
+            <TabsContent value="componentSelection">
+              <div className='grid gap-1.5 grid-cols-6 p-2.5'>
+                {
+                  componentModel.length > 0
+                    ?
+                    componentModel.map((item, index) => {
+                      return (
+                        <div key={index} className="flex items-center space-x-2 p-3">
+                          <Checkbox
+                            name={item.name}
+                            id={`${item.name}-${index}`}
+                            value={item.value}
+                            onCheckedChange={() => handleCheckboxChange(item.value)}
+                            checked={componentsSelected.includes(item.value) || selectedDependentComponents.includes(item.value)}
+                          />
+                          <label
+                            htmlFor={`${item.name}-${index}`}
+                            className={`text-sm 
                           ${componentsSelected.includes(item.value)
-                              ?
-                              `${selectedDependentComponents.includes(item.value) ? "text-red-700" : "text-yellow-400"} font-medium` :
-                              `${selectedDependentComponents.includes(item.value) ? "text-purple-600 font-medium" : ""}`
-                            }
+                                ?
+                                `${selectedDependentComponents.includes(item.value) ? "text-red-700" : "text-yellow-400"} font-medium` :
+                                `${selectedDependentComponents.includes(item.value) ? "text-purple-600 font-medium" : ""}`
+                              }
                           
 
                           leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70`}
-                        >
-                          {item.name}
-                        </label>
-                      </div>
-                    )
-                  })
-                  :
-                  <></>
+                          >
+                            {item.name}
+                          </label>
+                        </div>
+                      )
+                    })
+                    :
+                    <></>
 
-              }
-            </div>
-          </TabsContent>
-          <TabsContent value="dependencies">
-            <Dependencies
-              // componentsSelected={componentsSelected}
-              selectedComponentModel={selectedComponentModel}
+                }
+              </div>
+            </TabsContent>
+            <TabsContent value="dependencies">
+              <Dependencies
+                dependentComponentsArray={selectedDependentComponents}
+                componentsSelectedArray={componentsSelected}
+                selectedComponentModel={selectedComponentModel}
 
-            ></Dependencies>
+              ></Dependencies>
 
-          </TabsContent>
-          <TabsContent value="addVariants">
+            </TabsContent>
+            <TabsContent value="addVariants">
 
-            <AddVariants
-              handleAddVariantSave={handleAddVariantSave}
-              selectedComponentModel={selectedComponentModel}
+              <AddVariants
+                dependentComponentsArray={selectedDependentComponents}
+                componentsSelectedArray={componentsSelected}
+                handleAddVariantSave={handleAddVariantSave}
+                selectedComponentModel={selectedComponentModel}
+              // ComponentsSelected={ComponentsSelected}
 
-            ></AddVariants>
-          </TabsContent>
-          {/*  */}
-          <TabsContent value="submit">Redy to Submit</TabsContent>
-        </Tabs>
+              ></AddVariants>
+            </TabsContent>
+            {/*  */}
+            <TabsContent value="submit">Redy to Submit</TabsContent>
+          </Tabs>
 
 
 
 
-      </CardContent>
-      <CardFooter>
-        <div className='flex w-full justify-end gap-x-3'>
-          <Button variant={'secondary'} size={"md"}
-            disabled={componentsSelected.length > 0 ? false : true}
-            onClick={HandleSaveAsDraftClick}
-          >
-            Save as Draft
-          </Button>
-          <Button variant={'secondary'} size={"md"}
-            disabled={!isPreviousEnable}
-            onClick={HandlePreviousClick}
+        </CardContent>
+        <CardFooter>
+          <div className='flex w-full justify-end gap-x-3'>
+            <Button variant={'secondary'} size={"md"}
+              disabled={componentsSelected.length > 0 ? false : true}
+              onClick={handleSaveAsDraftClick}
+            >
+              Save as Draft
+            </Button>
+            <Button variant={'secondary'} size={"md"}
+              disabled={!isPreviousEnable}
+              onClick={handlePreviousClick}
+            >
+              Previous
+            </Button>
+            {
+              isSubmitEnable ?
+                <Button variant={'secondary'} size={"md"}
+                  onClick={handleSubmitClick}
+                  disabled={componentsSelected.length > 0 ? false : true}
+                >
+                  Submit
+                </Button>
+                :
+                <Button variant={'secondary'} size={"md"}
+                  onClick={handleNextClick}
+                  disabled={!enableNext()}
+                >
+                  Next
+                </Button>
+            }
 
-          >
-            Previous
-          </Button>
-          {
-            isSubmitEnable ?
-              <Button variant={'secondary'} size={"md"}
-                onClick={HandleSubmitClick}
-                disabled={componentsSelected.length > 0 ? false : true}
-              >
-                Submit
-              </Button>
-              :
-              <Button variant={'secondary'} size={"md"}
-                onClick={HandleNextClick}
-                disabled={componentsSelected.length > 0 ? false : true}
-              >
-                Next
-              </Button>
-          }
-
-        </div>
-      </CardFooter>
-    </Card >
+          </div>
+        </CardFooter>
+      </Card >
+    </div>
 
   )
 };
