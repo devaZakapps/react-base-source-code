@@ -176,28 +176,32 @@ export const Dependencies = ({
                 </div>
                 <div className="w-4/5" key="dependencyInstallationCommand">
 
-                    <div className=" w-11/12 mb-4 mt-6 max-h-[650px] overflow-x-auto rounded-lg border bg-zinc-950 p-1 dark:bg-zinc-900 text-white flex justify-between items-center">
+                    <div className=" w-11/12 mb-2 mt-2 max-h-[650px] overflow-x-auto rounded-lg border bg-zinc-950 p-1 dark:bg-zinc-900 text-white flex justify-between items-center">
                         <div className="p-1">
                             {
-                                dependencyInstallationCommand
+                                dependencyInstallationCommand == "npm install " ?
+                                    "No dependencies to be installed" : dependencyInstallationCommand
                             }
                         </div>
-                        <div className="p-1">
-                            <Copy color="#ffffff"
-                                onClick={() => {
-                                    if (dependencyInstallationCommand) {
-                                        navigator.clipboard.writeText(dependencyInstallationCommand)
-                                        // .then(() => {
-                                        //     alert("Command copied to clipboard!");
-                                        // })
-                                        // .catch((err) => {
-                                        //     console.error("Failed to copy command: ", err);
-                                        // });
-                                    }
-                                }}
-                            />
+                        {
+                            dependencyInstallationCommand == "npm install " ?
+                                "" :
+                                <div className="p-1">
+                                    <Copy color="#ffffff"
+                                        onClick={() => {
+                                            if (dependencyInstallationCommand) {
+                                                navigator.clipboard.writeText(dependencyInstallationCommand)
+                                                // .then(() => {
+                                                //     alert("Command copied to clipboard!");
+                                                // })s
+                                                // .catch((err) => {
+                                                //     console.error("Failed to copy command: ", err);
+                                                // });
+                                            }
+                                        }}
+                                    />
 
-                            {/* <button
+                                    {/* <button
 
                                 className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
                                 onClick={() => {
@@ -214,45 +218,11 @@ export const Dependencies = ({
                             >
                                 Copy
                             </button> */}
-                        </div>
+                                </div>
+                        }
+
                     </div>
                 </div>
-
-
-                {/* <div className="">
-
-                    <div className=" bg-gray-800 text-white w-11/12 rounded-md p-2">
-                        <div className="flex justify-between">
-                            <span>
-
-                            </span>
-                            <button
-
-                                className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
-                                onClick={() => {
-                                    if (dependencyInstallationCommand) {
-                                        navigator.clipboard.writeText(dependencyInstallationCommand)
-                                        // .then(() => {
-                                        //     alert("Command copied to clipboard!");
-                                        // })
-                                        // .catch((err) => {
-                                        //     console.error("Failed to copy command: ", err);
-                                        // });
-                                    }
-                                }}
-                            >
-                                Copy
-                            </button>
-                        </div>
-                        <div className="mb-4 mt-6 max-h-[650px] overflow-x-auto rounded-lg border bg-zinc-950 py-4 dark:bg-zinc-900">
-                            {
-                                dependencyInstallationCommand
-                            }
-                        </div>
-                    </div>
-
-
-                </div> */}
 
             </div>
 

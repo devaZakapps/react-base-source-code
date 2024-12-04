@@ -104,7 +104,7 @@ const Dashboard = () => {
             size={"icon"}
             variant={"icon"}
             onClick={() =>
-              alert("Delete Button")
+              alert("Download functionality is under progress.")
             }
           // className="flex items-center space-x-2 hover:underline"
           >

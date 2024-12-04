@@ -32,13 +32,15 @@ export const AddVariants = ({
 
     const [currentComponentModel, setCurrentComponentModel] = useState<ComponentModel>()
 
+    // const [isVariantAvailable, setIsVariantAvailable] = useState<boolean>(false)
 
     useEffect(() => {
         console.log("inside addVariants selectedComponentModel: ", selectedComponentModel)
         console.log("inside addVariants dependentComponentsArray: ", dependentComponentsArray)
         console.log("inside addVariants componentsSelectedArray: ", componentsSelectedArray)
         filterComponentsByVariantsData(selectedComponentModel)
-    }, [selectedComponentModel])
+
+    }, [componentsSelectedArray, dependentComponentsArray, selectedComponentModel])
 
 
 
@@ -285,171 +287,185 @@ export const AddVariants = ({
 
     return (
         <div className="flex">
-            <div className="w-[15%] p-2 flex flex-col ">
-                {
-                    selectedComponentModelData.map((item: ComponentModel, index) => {
-                        return (
-
-                            <div
-                                className={`${currentComponentModel?.value == item.value ? "bg-[#3b87f2] text-white" : ""}`}
-                                key={index}
-                                onClick={() => { handleComponentSelection(item.value) }}
-                            >
-                                {item.isVariant ? item.name : ""}
-                            </div>
-                        )
-                    })
-                }
-            </div>
-            <div className="w-[100%] p-2 ">
-                <h3>Title: {currentComponentModel?.name}</h3>
-                <div>
-                    <div className="my-2">
-                        <div className="flex gap-2 items-center my-2">
-                            <h4>Variant Props</h4>
-                            <Button variant={"icon"}
-                                onClick={handleAddVariantProp}
-                            ><Plus /></Button>
-                        </div>
 
 
-                        {
-                            currentComponentModel?.variants?.map((variant, variantIndex) => {
-                                return (
-                                    <div key={variantIndex} className="flex flex-col gap-2">
-                                        <div className="flex gap-1 items-center">
-                                            <span>Key: </span>
-                                            <Input
-                                                variant={'primary'}
-                                                disabled={variant.isSaved}
-                                                value={variant.name}
-                                                onChange={(event) => handleVariantKeyChange(variantIndex, event.target.value)}
-                                            ></Input>
+            {
+                selectedComponentModelData.length > 0
+                    ?
+                    <>
+                        <div className="w-[15%] p-2 flex flex-col ">
+                            {
+                                selectedComponentModelData.map((item: ComponentModel, index) => {
+                                    return (
 
-                                            <Dialog>
-                                                <DialogTrigger>
-                                                    <Button variant={"icon"} >
-                                                        <Eye />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        {currentComponentModel?.variants && currentComponentModel.variants[variantIndex] && (
-                                                            <>
-                                                                <DialogTitle>{variant.name.toUpperCase()} </DialogTitle>
-                                                                <DialogDescription className="min-h-9 min-w-10 flex flex-col gap-7">
-                                                                    <PreviewComponent
-                                                                        currentComponentModel={currentComponentModel}
-                                                                        componentName={currentComponentModel.name}
-                                                                        variant={currentComponentModel.variants[variantIndex]}
-                                                                    >
-                                                                    </PreviewComponent>
-
-                                                                </DialogDescription>
-                                                            </>
-
-                                                        )}
-
-                                                    </DialogHeader>
-                                                </DialogContent>
-                                            </Dialog>
-
-                                            {
-                                                variant.isSaved ?
-                                                    <Button variant={"icon"}
-                                                        onClick={() => handleEditClick(variantIndex)}
-                                                    ><Pencil></Pencil></Button>
-                                                    :
-                                                    <Button variant={"icon"}
-                                                        onClick={() => handleSaveClick(variantIndex)}
-                                                    ><Save></Save></Button>
-
-                                            }
-                                            <Button variant={"icon"}
-                                                onClick={() => handleDeleteVariant(variantIndex)} // Call the delete function
-                                            ><X /></Button>
-                                        </div>
                                         <div
-                                            className="w-[100%">
-                                            {Object.entries(variant.value).map(([key, value], index, array) => (
-                                                <div
-                                                    className="w-[100%]"
-                                                    key={index}
-                                                    style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                                    <Input
-                                                        variant={'primary'}
-                                                        type="text"
-                                                        value={key}
-                                                        disabled={key === "default" || variant.isSaved}
-                                                        placeholder="Key"
-                                                        className="w-[30%]"
-                                                        onChange={(event) => handleVariantValueKeyChange(variantIndex, index, event.target.value)} // Handle key change
+                                            className={`${currentComponentModel?.value == item.value ? "bg-[#3b87f2] text-white" : ""}`}
+                                            key={index}
+                                            onClick={() => { handleComponentSelection(item.value) }}
+                                        >
+                                            {item.isVariant ? item.name : ""}
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                        <div className="w-[100%] p-2 ">
+                            <h3>Title: {currentComponentModel?.name}</h3>
+                            <div>
+                                <div className="my-2">
+                                    <div className="flex gap-2 items-center my-2">
+                                        <h4>Variant Props</h4>
+                                        <Button variant={"icon"}
+                                            onClick={handleAddVariantProp}
+                                        ><Plus /></Button>
+                                    </div>
 
-                                                    />
-                                                    <Input
-                                                        className="w-[70%]"
-                                                        variant={'primary'}
-                                                        type="text"
-                                                        value={value}
-                                                        placeholder="Value"
-                                                        disabled={variant.isSaved}
 
-                                                        onChange={(event) => handleVariantValueChange(variantIndex, key, event.target.value)}
-                                                    />
-                                                    {/* <Button variant={"icon"} ><Eye /></Button> */}
-                                                    {/* <Button variant={"icon"}><Pencil></Pencil></Button> */}
-                                                    {/* <Button variant={"icon"} ><Save></Save></Button> */}
-                                                    {
-                                                        variant.isSaved ?
-                                                            ""
-                                                            :
-                                                            <>
-                                                                {index === array.length - 1 && (
-                                                                    <Button variant={"icon"}
-                                                                        disabled={key.trim() == "" || value.trim() == ""}
-                                                                        onClick={() => handleAddEmptyValueObject(variantIndex)}
-                                                                    ><Plus /></Button>
-                                                                )}
+                                    {
+                                        currentComponentModel?.variants?.map((variant, variantIndex) => {
+                                            return (
+                                                <div key={variantIndex} className="flex flex-col gap-2">
+                                                    <div className="flex gap-1 items-center">
+                                                        <span>Key: </span>
+                                                        <Input
+                                                            variant={'primary'}
+                                                            disabled={variant.isSaved}
+                                                            value={variant.name}
+                                                            onChange={(event) => handleVariantKeyChange(variantIndex, event.target.value)}
+                                                        ></Input>
 
+                                                        <Dialog>
+                                                            <DialogTrigger>
+                                                                <Button variant={"icon"} >
+                                                                    <Eye />
+                                                                </Button>
+                                                            </DialogTrigger>
+                                                            <DialogContent>
+                                                                <DialogHeader>
+                                                                    {currentComponentModel?.variants && currentComponentModel.variants[variantIndex] && (
+                                                                        <>
+                                                                            <DialogTitle>{currentComponentModel.name} - {variant.name.toUpperCase()} </DialogTitle>
+                                                                            <DialogDescription className="min-h-9 min-w-10 flex flex-col gap-7">
+                                                                                <PreviewComponent
+                                                                                    currentComponentModel={currentComponentModel}
+                                                                                    componentName={currentComponentModel.name}
+                                                                                    variant={currentComponentModel.variants[variantIndex]}
+                                                                                >
+                                                                                </PreviewComponent>
+
+                                                                            </DialogDescription>
+                                                                        </>
+
+                                                                    )}
+
+                                                                </DialogHeader>
+                                                            </DialogContent>
+                                                        </Dialog>
+
+                                                        {
+                                                            variant.isSaved ?
                                                                 <Button variant={"icon"}
+                                                                    onClick={() => handleEditClick(variantIndex)}
+                                                                ><Pencil></Pencil></Button>
+                                                                :
+                                                                <Button variant={"icon"}
+                                                                    onClick={() => handleSaveClick(variantIndex)}
+                                                                ><Save></Save></Button>
 
-                                                                    className={
-                                                                        `${key == "default" ? "hidden" : ""}`
-                                                                    }
-                                                                    onClick={() => handleDeleteValueObject(variantIndex, key)} // Call delete value object
-                                                                ><X /></Button>
-                                                            </>
-                                                    }
+                                                        }
+                                                        <Button variant={"icon"}
+                                                            onClick={() => handleDeleteVariant(variantIndex)} // Call the delete function
+                                                        ><X /></Button>
+                                                    </div>
+                                                    <div
+                                                        className="w-[100%">
+                                                        {Object.entries(variant.value).map(([key, value], index, array) => (
+                                                            <div
+                                                                className="w-[100%]"
+                                                                key={index}
+                                                                style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                                                                <Input
+                                                                    variant={'primary'}
+                                                                    type="text"
+                                                                    value={key}
+                                                                    disabled={key === "default" || variant.isSaved}
+                                                                    placeholder="Key"
+                                                                    className="w-[30%]"
+                                                                    onChange={(event) => handleVariantValueKeyChange(variantIndex, index, event.target.value)} // Handle key change
+
+                                                                />
+                                                                <Input
+                                                                    className="w-[70%]"
+                                                                    variant={'primary'}
+                                                                    type="text"
+                                                                    value={value}
+                                                                    placeholder="Value"
+                                                                    disabled={variant.isSaved}
+
+                                                                    onChange={(event) => handleVariantValueChange(variantIndex, key, event.target.value)}
+                                                                />
+                                                                {/* <Button variant={"icon"} ><Eye /></Button> */}
+                                                                {/* <Button variant={"icon"}><Pencil></Pencil></Button> */}
+                                                                {/* <Button variant={"icon"} ><Save></Save></Button> */}
+                                                                {
+                                                                    variant.isSaved ?
+                                                                        ""
+                                                                        :
+                                                                        <>
+                                                                            {index === array.length - 1 && (
+                                                                                <Button variant={"icon"}
+                                                                                    disabled={key.trim() == "" || value.trim() == ""}
+                                                                                    onClick={() => handleAddEmptyValueObject(variantIndex)}
+                                                                                ><Plus /></Button>
+                                                                            )}
+
+                                                                            <Button variant={"icon"}
+
+                                                                                className={
+                                                                                    `${key == "default" ? "hidden" : ""}`
+                                                                                }
+                                                                                onClick={() => handleDeleteValueObject(variantIndex, key)} // Call delete value object
+                                                                            ><X /></Button>
+                                                                        </>
+                                                                }
 
 
-                                                    {/* <Button variant={"icon"}
+                                                                {/* <Button variant={"icon"}
                                                         onClick={() => handleAddEmptyValueObject(variantIndex)}
                                                     ><Plus /></Button> */}
 
+                                                            </div>
+                                                        ))}
+
+                                                    </div>
                                                 </div>
-                                            ))}
+                                            )
+                                        })
 
-                                        </div>
+                                    }
+                                    <div>
+                                        <Button
+                                            variant={"primary"}
+                                            size={"sm"}
+                                            disabled={isSaveEnabled()}
+                                            // onClick={handleAddVariantSave(currentComponentModel?.name, currentComponentModel)}
+                                            onClick={() => {
+                                                handleAddVariantSave(currentComponentModel?.name, currentComponentModel?.variants)
+                                            }}
+                                        >Save</Button>
                                     </div>
-                                )
-                            })
-
-                        }
-                        <div>
-                            <Button
-                                variant={"primary"}
-                                size={"sm"}
-                                disabled={isSaveEnabled()}
-                                // onClick={handleAddVariantSave(currentComponentModel?.name, currentComponentModel)}
-                                onClick={() => {
-                                    handleAddVariantSave(currentComponentModel?.name, currentComponentModel?.variants)
-                                }}
-                            >Save</Button>
+                                </div>
+                            </div>
                         </div>
+                    </>
+                    :
+                    <div className="text-center w-full">
+                        <span className="font-semibold ">
+                            There is no components with variants
+                        </span>
                     </div>
-                </div>
+            }
 
-            </div>
         </div>
     )
 }

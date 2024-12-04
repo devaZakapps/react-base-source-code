@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react"
 import { ComponentModel, Variant } from "../../../pages/ProjectGenerator"
-import { Button as NewButton } from "./DefaultComponents/ui/button"
+import { PreviewButton } from "./GeneratedComponents/ui/button"
+// import { PreviewButton } from "./GeneratedComponents/ui/button"
 
 
 
@@ -19,51 +19,39 @@ export const PreviewComponent = ({ currentComponentModel, componentName, variant
 
     console.log("variant: ", variant)
     console.log("currentComponentModel: ", currentComponentModel)
-    const [defaultValues, setDefaultValues] = useState(''); // Default color
+    // const [defaultValues, setDefaultValues] = useState(''); // Default color
 
 
-    useEffect(() => {
-
-        console.log("inside useEffect: ")
-        let defaultValue = ""
-        currentComponentModel?.variants?.map((item) => {
-            // console.log("inside currentComponentModel :", item.name)
-            defaultValue = defaultValue + `${item.value.default}`
-        })
-        console.log("inside useEffect defaultValue: ", defaultValue)
-
-        setDefaultValues(defaultValue)
-
-
-
-
-
-    }, [])
 
 
     return (
         <div>
-            {componentName}
+            {/* {componentName} */}
             <div
                 // key={variantIndex}
                 className="variant-container flex flex-col">
+                <PreviewButton
+                    variant={variant}
+                    currentComponentModel={currentComponentModel}
+                />
                 {/* <h3>Variant {variantIndex + 1}: {variant.name}</h3> */}
 
                 {/* Map through the key-value pairs in variant.value */}
-                {Object.entries(variant.value).map(([key, value], valueIndex) => (
+                {/* {Object.entries(variant.value).map(([key, value], valueIndex) => (
                     <div key={valueIndex} className="flex gap-8 ">
                         <label className="w-32">
                             {key}
                         </label>
-                        <label className="my-2">
+                        <div className="my-2">
 
-                            <NewButton
-                                className={`${defaultValues}`}
-                            >button</NewButton>
-                        </label>
+                            <PreviewButton
+                                buttonData={currentComponentModel}
+                                className={`${value}`}
+                            >{key}</PreviewButton>
+                        </div>
 
                     </div>
-                ))}
+                ))} */}
             </div>
         </div >
     )

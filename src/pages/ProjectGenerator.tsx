@@ -190,7 +190,9 @@ export const SampleComponentModelData: ComponentModel[] = [
     installCmd: '',
     component: "breadcrumb",
     dependencies: {
-      components: [],
+      components: [
+        "dropdownmenu"
+      ],
       hooks: [],
       external: ["@radix-ui/react-slot"]
     },
@@ -216,16 +218,12 @@ export const SampleComponentModelData: ComponentModel[] = [
       {
         name: "variant",
         value: {
-          default:
-            "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-          destructive:
-            "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-          outline:
-            "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-          secondary:
-            "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+          default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+          destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
           ghost: "hover:bg-accent hover:text-accent-foreground",
-          link: "text-primary underline-offset-4 hover:underline",
+          link: "text-primary underline-offset-4 hover:underline"
         },
         isSaved: true
       },
@@ -235,7 +233,7 @@ export const SampleComponentModelData: ComponentModel[] = [
           default: "h-9 px-4 py-2",
           sm: "h-8 rounded-md px-3 text-xs",
           lg: "h-10 rounded-md px-8",
-          icon: "h-9 w-9",
+          icon: "h-9 w-9"
         },
         isSaved: true
       },
@@ -258,7 +256,7 @@ export const SampleComponentModelData: ComponentModel[] = [
       ]
     },
     configFiles: [],
-    isVariant: true,
+    isVariant: false,
     variants: [
       {
         name: "classNames",
@@ -1533,6 +1531,7 @@ const ProjectGenerator: React.FC = () => {
 
   return (
     <div className='p-2'>
+
       <Card className='' >
         <CardContent className='p-2'>
           <Tabs value={currentTab} className="w-full">

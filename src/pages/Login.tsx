@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/button';
 import { getUserProfile, userLogin } from '../api/userModal';
-import { UserRequest } from '../type/data/user';
 import { redirectToPage } from '../utils/utils';
 import axios from 'axios';
 import { Input } from '../components/ui/input';
-import { Link } from 'react-router-dom';
 
 function Login() {
   const [emailId, setEmailId] = useState('');
