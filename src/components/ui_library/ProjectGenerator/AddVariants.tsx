@@ -346,12 +346,13 @@ export const AddVariants = ({
                                                                         <>
                                                                             <DialogTitle>{currentComponentModel.name} - {variant.name.toUpperCase()} </DialogTitle>
                                                                             <DialogDescription className="min-h-9 min-w-10 flex flex-col gap-7">
-                                                                                <PreviewComponent
+                                                                                {/* <PreviewComponent
                                                                                     currentComponentModel={currentComponentModel}
                                                                                     componentName={currentComponentModel.name}
                                                                                     variant={currentComponentModel.variants[variantIndex]}
                                                                                 >
-                                                                                </PreviewComponent>
+                                                                                </PreviewComponent> */}
+                                                                                <></>
 
                                                                             </DialogDescription>
                                                                         </>
